@@ -1,0 +1,99 @@
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id                String         @id @default(auto()) @map("_id") @db.ObjectId // Assuming MongoDB uses ObjectId for id
+  userID            String         @unique 
+  first_name        String
+  last_name         String
+  email             String
+  phone_number      String
+  gender            String
+  profile_image_url String
+  created_at        Int
+  updated_at        Int
+  Bookings          Booking[]
+  DriverReview      DriverReview[]
+  Reviews           Reviews[]
+}
+
+model Car {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId 
+  model       String
+  name        String
+  description String
+  seats       String
+  image       String
+  price       String
+  driver      Driver?   @relation(fields: [driverId], references: [id])
+  driverId    String?   @db.ObjectId
+  bookings    Booking[]
+}
+
+model Booking {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  car            Car?     @relation(fields: [carId], references: [id])
+  carId          String   @db.ObjectId
+  user           User     @relation(fields: [userId], references: [id])
+  userId         String  
+  status         String   @default("Pending")
+  serviceType    String
+  tripType       String
+  airportTaxi    String
+  pickUpLocation String
+  dropOutLocation   String
+  startTime      String  
+  endTime        String  
+  rentalPackage   String   
+  distance       Float    
+  paymentstatus  Boolean    @default(false)
+  paymentId      String     
+  amount         Float   
+  currency       String  
+  bookedAt       DateTime    @default(now())
+}
+
+model Driver {
+  id          String         @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  phoneNumber String
+  nativePlace String
+  cars        Car[]
+  image       String
+  reviews     DriverReview[]
+}
+
+model ContactSupport {
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  userId   String
+  name     String
+  email    String
+  phoneNumber String
+  message String
+}
+
+model DriverReview {
+  id          String  @id @default(auto()) @map("_id") @db.ObjectId
+  user        User    @relation(fields: [userId], references: [id])
+  userId      String  @db.ObjectId
+  place       String
+  description String
+  driver      Driver? @relation(fields: [driverId], references: [id])
+  driverId    String? @db.ObjectId
+  rating      Int
+}
+
+model Reviews {
+  id          String @id @default(auto()) @map("_id") @db.ObjectId
+  user        User   @relation(fields: [userId], references: [id])
+  userId      String 
+  place       String
+  description String
+  rating      Int
+}
